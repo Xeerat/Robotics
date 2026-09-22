@@ -1,0 +1,22 @@
+name: Course Practices CI Check
+
+on: [push, pull_request]
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04 
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Download course kit
+        run: |
+          mkdir -p .course-kit
+          curl -fLO https://ros.lms.ci.nsu.ru/downloads/robotics-course-kit-v1.tar.gz
+          tar -xzf robotics-course-kit-v1.tar.gz -C .course-kit
+
+      - name: Run practice checker for PR01
+        if: contains(github.ref, 'pr01') || contains(github.event.head_commit.message, 'PR01')
+        run: |
+          python3 .course-kit/v1/tools/check_practice.py PR01 --submission .
