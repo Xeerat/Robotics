@@ -20,8 +20,8 @@ def validate_params(linear_speed, turn_rate, publish_hz):
         return False, f'linear_speed {linear_speed} out of [0, 1]'
     if not (-1.0 <= float(turn_rate) <= 1.0):
         return False, f'turn_rate {turn_rate} out of [-1, 1]'
-    # if not (1.0 <= float(publish_hz) <= 30.0):
-    #     return False, f'publish_hz {publish_hz} out of [1, 30]'
+    if not (1.0 <= float(publish_hz) <= 30.0):
+        return False, f'publish_hz {publish_hz} out of [1, 30]'
     return True, 'ok'
 
 
