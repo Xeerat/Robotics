@@ -1,0 +1,8 @@
+$ xacro src/course_description/urdf/vehicle.urdf.xacro > /tmp/vehicle.urdf
+$ check_urdf /tmp/vehicle.urdf
+robot name is: course_ackermann
+---------- Successfully Parsed XML ---------------
+root Link: base_link has 3 child(ren)
+    child(1):  camera_link
+    child(2):  imu_link
+    child(3):  lidar_link

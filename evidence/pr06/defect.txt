@@ -1,0 +1,20 @@
+# Дефект: lidar_joint parent=camera_link
+
+$ colcon test --packages-select course_description
+Starting >>> course_description
+Finished <<< course_description [9.27s]	[ with test failures ]
+
+Summary: 1 package finished [11.4s]
+  1 package had test failures: course_description
+
+$ colcon test-result --verbose
+build/course_description/pytest.xml: 8 tests, 0 errors, 1 failure, 1 skipped
+- course_description.test.test_structure test_lidar_parent_is_base_link
+  <<< failure message
+    AssertionError: lidar_joint parent must be base_link, got camera_link
+    assert 'camera_link' == 'base_link'
+      - base_link
+      + camera_link
+  >>>
+
+Summary: 29 tests, 0 errors, 1 failure, 2 skipped

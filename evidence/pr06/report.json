@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR06",
+  "commit": "ea5358671f285f9252e46b3ae4206d1279249e1e",
+  "course_kit": {
+    "version": "v1-w06",
+    "archive_sha256": "6eda53e1c566f7f0a7e09d7afe1e5a6f3b98397175a7e57dede9a84c6d14d0fe"
+  },
+  "commands": [
+    "colcon build --packages-select course_description",
+    "xacro src/course_description/urdf/vehicle.urdf.xacro > /tmp/vehicle.urdf",
+    "check_urdf /tmp/vehicle.urdf",
+    "ros2 launch course_description description.launch.py",
+    "ros2 run tf2_ros tf2_echo base_link lidar_link",
+    "ros2 run tf2_tools view_frames",
+    "colcon test --packages-select course_description"
+  ],
+  "tests": [
+    {"name": "test_xacro_expands", "status": "passed"},
+    {"name": "test_check_urdf_passes", "status": "passed"},
+    {"name": "test_lidar_parent_is_base_link", "status": "passed"},
+    {"name": "test_all_sensors_present", "status": "passed"},
+    {"name": "test_fixed_joints_have_origin", "status": "passed"}
+  ],
+  "defect": {
+    "reproducer": "В urdf/vehicle.urdf.xacro у lidar_joint parent изменён с base_link на camera_link. Команда colcon test --packages-select course_description завершается провалом теста test_lidar_parent_is_base_link. Визуально в RViz lidar оказывается привязанным к камере, а не к корпусу, и его мировое положение смещается.",
+    "root_cause": "Сенсоры должны крепиться к корпусу (base_link), а не друг к другу. Изменение parent на camera_link создаёт цепочку base_link → camera_link → lidar_link. Теперь положение lidar зависит от положения камеры, хотя физически лидар стоит на крыше, а не на камере. check_urdf этого не замечает — дерево всё ещё связно и ациклично, но геометрия неверна.",
+    "proof_after": "Возврат parent=base_link в lidar_joint. Тест test_lidar_parent_is_base_link снова проходит. ros2 run tf2_echo base_link lidar_link показывает ожидаемые координаты. colcon test зелёный. check_urdf подтверждает корректность URDF."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 4
+  },
+  "ai_used": true
+}
