@@ -1,0 +1,18 @@
+x: 5.544444561004639
+y: 5.544444561004639
+theta: 0.0
+linear_velocity: 0.0
+angular_velocity: 0.0
+---
+
+Files:             bag_0.mcap
+Bag size:          57.9 KiB
+Storage id:        mcap
+ROS Distro:        jazzy
+Duration:          12.280619997s
+Start:             Oct 13 2026 07:26:52.386001379 (1791876412.386001379)
+End:               Oct 13 2026 07:27:04.666621376 (1791876424.666621376)
+Messages:          769
+Topic information: Topic: /robot_a/sensor_pose | Type: turtlesim/msg/Pose | Count: 769 | Serialization Format: cdr
+Service:           0
+Service information: 

@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "practice_id": "PR05",
+  "commit": "2c01400fcba3ca4383d90fbc2792c92f581c84ee",
+  "course_kit": {
+    "version": "v1-w05",
+    "archive_sha256": "bca214e3de6f90f9513049dfa0f36fee65ad834da502dc3f3f8fb443517b5197"
+  },
+  "commands": [
+    "colcon build --symlink-install --packages-select patrol turtle_bringup",
+    "ros2 launch turtle_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=reliable record:=false",
+    "timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability reliable --once",
+    "ros2 launch turtle_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=best_effort record:=false",
+    "timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability best_effort --once",
+    "ros2 bag record -s mcap -o evidence/pr05/bag --topics /robot_a/sensor_pose",
+    "ros2 bag play evidence/pr05/bag --qos-profile-overrides-path src/turtle_bringup/config/qos-overrides.yaml",
+    "ros2 bag info evidence/pr05/bag",
+    "python3 .course-kit/v1/tools/check_practice.py PR05 --submission ."
+  ],
+  "tests": [    
+    {"name": "test_validate_params[0.5-0.3-10.0-True]", "status": "passed"},
+    {"name": "test_validate_params[0.5-0.3-0.0-False]", "status": "passed"},
+    {"name": "test_validate_params[nan-0.3-10.0-False]", "status": "passed"},
+    {"name": "test_zero_hz_reason", "status": "passed"},
+    {"name": "test_choose_command_no_pose", "status": "passed"},
+    {"name": "test_choose_command_with_pose", "status": "passed"},
+    {"name": "test_choose_command_respects_parameters", "status": "passed"}
+  ],
+  "defect": {
+    "reproducer": "Запуск системы: ros2 launch turtle_bringup patrol.launch.py namespace:=robot_a subscriber_reliability:=reliable record:=false. Нода pose_relay публикует /robot_a/sensor_pose с QoS best_effort. Попытка подписаться как reliable-подписчик: timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability reliable --once. Топик виден в ros2 topic list, но сообщений нет — echo завершается по таймауту без вывода.",
+    "root_cause": "Издатель pose_relay создаёт publisher с QoS-профилем reliability=BEST_EFFORT (сенсорный поток не должен блокироваться). Подписчик (в данном случае ros2 topic echo с флагом --qos-reliability reliable) запрашивает RELIABLE. По правилам DDS, reliable-подписчик не может установиться на best_effort-издатель: требуемая надёжность выше предлагаемой. Соединение не формируется, сообщения не доставляются, хотя сам топик анонсируется в discovery.",
+    "proof_after": "Перезапуск launch с subscriber_reliability:=best_effort. Команда timeout 3s ros2 topic echo /robot_a/sensor_pose --qos-reliability best_effort --once успешно получает сообщение с координатами черепахи. Запись в MCAP (ros2 bag record -s mcap) сохраняет поток. Replay с overrides (ros2 bag play --qos-profile-overrides-path config/qos-overrides.yaml) также доставляет сообщения при подписке с best_effort. ros2 bag info показывает один топик /robot_a/sensor_pose с ненулевым счётчиком сообщений. Несовместимость устранена выравниванием профилей: и издатель, и подписчик используют best_effort."
+  },
+  "claims": {
+    "public_tests_passed": true,
+    "defect_reproduced": true,
+    "defect_fixed": true,
+    "replay_verified": true
+  },
+  "time": {
+    "contact_academic_hours": 2,
+    "self_study_hours": 4
+  },
+  "ai_used": true
+}
